@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stickman Fishing Prototype</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="game-shell">
+    <header class="hud">
+      <div class="hud-group">
+        <span class="hud-label">Coins:</span>
+        <span id="coins-value">0</span>
+      </div>
+      <div class="hud-group">
+        <span class="hud-label">Bait:</span>
+        <span id="bait-level">Lv. 1 | Basic Bait</span>
+      </div>
+      <div class="hud-group status">
+        <span id="status-text">Ready to fish!</span>
+      </div>
+    </header>
+
+    <section class="playfield">
+      <canvas id="game-canvas" width="640" height="360" aria-label="Fishing game view"></canvas>
+    </section>
+
+    <nav class="controls">
+      <button id="cast-btn">Cast Line</button>
+      <button id="reel-btn" disabled>Reel In</button>
+      <button id="upgrade-btn">Upgrade Bait</button>
+      <button id="toggle-collection-btn">View Collection</button>
+    </nav>
+
+    <aside id="collection-panel" class="panel hidden" aria-live="polite">
+      <header>
+        <h2>Fishing Log</h2>
+        <button id="close-collection-btn" aria-label="Close collection panel">X</button>
+      </header>
+      <ul id="collection-list">
+        <li class="empty">No fish caught yet.</li>
+      </ul>
+    </aside>
+  </main>
+
+  <div id="catch-overlay" class="catch-overlay hidden" role="dialog" aria-modal="true" aria-live="assertive">
+    <div class="catch-card">
+      <div class="catch-image-frame">
+        <img id="catch-image" src="" alt="" />
+      </div>
+      <div class="catch-text">
+        <h3 id="catch-name">New Catch!</h3>
+        <p id="catch-stats"></p>
+        <div class="catch-actions">
+          <button id="sell-fish-btn" class="sell-catch-btn hidden">Sell One</button>
+          <button id="close-catch-btn" class="close-catch-btn">Showcase Later</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js" type="module"></script>
+</body>
+</html>

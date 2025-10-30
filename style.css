@@ -1,0 +1,389 @@
+:root {
+  color-scheme: light dark;
+  font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+  background-color: #0d1b2a;
+  color: #e5eeff;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #4f83ff 0%, #17324f 55%, #0b1a2e 100%);
+  overflow: hidden;
+}
+
+.game-shell {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-width: none;
+  margin: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
+  padding: clamp(0.75rem, 1.5vw, 1.8rem);
+  box-sizing: border-box;
+  position: relative;
+}
+
+.hud {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  background: rgba(13, 33, 67, 0.88);
+  padding: 0.85rem 1.2rem;
+  border-radius: 0.9rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+.hud-group {
+  display: flex;
+  gap: 0.55rem;
+  align-items: baseline;
+  font-size: 1.05rem;
+}
+
+.hud-label {
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.status {
+  margin-left: auto;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.playfield {
+  position: relative;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  min-height: 0;
+}
+
+#game-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(#bde5ff 0%, #bde5ff 45%, #4ca4df 45%, #4ca4df 100%);
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.controls button {
+  flex: 1 1 220px;
+  padding: 0.9rem 1.1rem;
+  border: none;
+  border-radius: 0.9rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #f1f5f9;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.controls button:disabled {
+  background: #475569;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.controls button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.55);
+}
+
+.panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(300px, 60vw, 500px);
+  max-height: 70vh;
+  background: rgba(8, 20, 40, 0.95);
+  border-radius: 1.25rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.6);
+  padding: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(14px);
+  z-index: 20;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.panel header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.panel h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+#close-collection-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#collection-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+#collection-list li {
+  padding: 0.7rem 0.85rem;
+  border-radius: 0.65rem;
+  margin-bottom: 0.6rem;
+  background: rgba(148, 163, 184, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.95rem;
+}
+
+#collection-list li.collection-item {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+#collection-list li.collection-item:hover {
+  transform: translateY(-2px);
+  background: rgba(148, 197, 255, 0.18);
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.15);
+}
+
+#collection-list li.collection-item:focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.9);
+  outline-offset: 2px;
+}
+
+#collection-list li .fish-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+#collection-list li .fish-name {
+  font-weight: 600;
+}
+
+#collection-list li .fish-meta {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+#collection-list li .fish-thumb {
+  width: 64px;
+  height: 38px;
+  border-radius: 0.6rem;
+  box-shadow: inset 0 0 0 2px rgba(148, 197, 255, 0.25);
+}
+
+#collection-list li .fish-count {
+  font-weight: 700;
+  background: rgba(15, 118, 110, 0.2);
+  color: #5eead4;
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  min-width: 2.5rem;
+  text-align: center;
+  margin-left: auto;
+}
+
+#collection-list li.empty {
+  justify-content: center;
+  color: rgba(248, 250, 252, 0.7);
+  font-style: italic;
+}
+
+.rarity-Common {
+  color: #e2e8f0;
+}
+
+.rarity-Uncommon {
+  color: #86efac;
+}
+
+.rarity-Rare {
+  color: #60a5fa;
+}
+
+.rarity-Epic {
+  color: #c084fc;
+}
+
+.rarity-Legendary {
+  color: #fbbf24;
+}
+
+.catch-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 12, 24, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 30;
+}
+
+.catch-card {
+  display: flex;
+  flex-direction: row;
+  gap: 1.25rem;
+  background: linear-gradient(160deg, rgba(15, 48, 80, 0.95), rgba(13, 33, 67, 0.9));
+  border-radius: 1.5rem;
+  padding: 1.6rem;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+  max-width: 540px;
+  width: 100%;
+  color: #e2ecff;
+}
+
+.catch-image-frame {
+  flex: 0 0 190px;
+  background: rgba(15, 118, 110, 0.18);
+  border-radius: 1.1rem;
+  padding: 0.85rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.catch-image-frame img {
+  width: 100%;
+  height: auto;
+  border-radius: 0.95rem;
+  box-shadow: inset 0 0 0 2px rgba(148, 197, 255, 0.25);
+}
+
+.catch-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  justify-content: center;
+}
+
+.catch-text h3 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.catch-text p {
+  margin: 0;
+  line-height: 1.5;
+  font-size: 0.98rem;
+  color: rgba(226, 236, 255, 0.85);
+}
+
+.catch-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.close-catch-btn {
+  align-self: flex-start;
+  padding: 0.55rem 1.25rem;
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+  background: rgba(59, 130, 246, 0.88);
+  color: #e5eeff;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.close-catch-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(59, 130, 246, 0.45);
+}
+
+.sell-catch-btn {
+  padding: 0.55rem 1.25rem;
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.85);
+  color: #e5fdf4;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.sell-catch-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(16, 185, 129, 0.45);
+}
+
+.sell-catch-btn:disabled {
+  background: rgba(71, 85, 105, 0.6);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .hud {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .status {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .game-shell {
+    padding: 1rem;
+  }
+
+  .controls button {
+    flex-basis: 100%;
+  }
+
+  .catch-card {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .catch-image-frame {
+    width: 100%;
+  }
+
+  .close-catch-btn {
+    align-self: center;
+  }
+
+  .catch-actions {
+    justify-content: center;
+  }
+}
