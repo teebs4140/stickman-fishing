@@ -60,6 +60,29 @@
     </div>
   </div>
 
+  <div id="qte-overlay" class="qte-overlay hidden" role="dialog" aria-modal="true" aria-live="assertive">
+    <div class="qte-content">
+      <h2 class="qte-title">REEL NOW!</h2>
+      <div class="qte-timer-container">
+        <div id="qte-timer-bar" class="qte-timer-bar"></div>
+      </div>
+      <p class="qte-hint">Click Reel In or press Space!</p>
+    </div>
+  </div>
+
+  <div id="meter-overlay" class="meter-overlay hidden" role="dialog" aria-modal="true" aria-live="assertive">
+    <div class="meter-container">
+      <h3 class="meter-title">Time your catch!</h3>
+      <div class="meter-bar-container">
+        <div class="meter-bar">
+          <div id="meter-target-zone" class="meter-target-zone"></div>
+          <div id="meter-indicator" class="meter-indicator"></div>
+        </div>
+      </div>
+      <p class="meter-hint">Click when in the <span style="color: #10b981;">green zone</span>!</p>
+    </div>
+  </div>
+
   <script src="game.js" type="module"></script>
 </body>
 </html>

@@ -31,4 +31,32 @@
 - Layout update: removed desktop letterboxing and let the game shell scale to the full viewport (using 100dvh/100vw) so the fishing scene fills the entire device screen.
 - Collection update: added thumb art beside each fish entry by reusing the SVG generator so the showcase list now highlights what every species looks like at a glance.
 - UX update: collection entries are interactive; clicking or pressing Enter/Space opens the overlay with a full-size fish card for that species.
-- Economy update: collection overlay now offers a “Sell One” action (and keyboard `S`) to trade surplus fish for coins, with rarity-weighted payouts.
+- Economy update: collection overlay now offers a "Sell One" action (and keyboard `S`) to trade surplus fish for coins, with rarity-weighted payouts.
+
+### 2025-10-30
+- **Major Feature: Fishing Mini-Game Challenge System**
+  - Problem identified: No challenge when fish bites—player could simply click "Reel In" anytime with guaranteed success.
+  - Implemented two-stage mini-game system to add skill-based gameplay:
+    1. **Quick-Time Event (QTE)**: When fish bites, player must click "Reel In" within 2.5 seconds or fish escapes
+    2. **Meter Timing Game**: After passing QTE, player must time click to hit green target zone (60-75%) on oscillating meter
+  - Added new game phase: `minigame` between `hooked` and `reeling` states
+  - Created QTE overlay with animated countdown timer bar and pulsing "REEL NOW!" text
+  - Created meter overlay with horizontal progress bar, green target zone, and moving blue indicator
+  - Meter mechanic details:
+    - Indicator fills from 0% to 100% (first chance), then bounces back to 0% (second chance)
+    - Player gets two attempts total; missing both causes fish to escape
+    - Meter speed scales with fish size using multiplicative formula: `base * (1 + fishSizeRatio * multiplier)`
+    - Small fish (~20cm): slow, easy timing
+    - Large fish (~150cm+): fast meter, challenging timing
+  - Added fish escape scenarios with feedback messages:
+    - "Too slow! The fish got away." (missed QTE)
+    - "Missed! The fish broke free." (clicked outside target zone)
+    - "Too late! The fish broke free." (missed both meter attempts)
+  - CSS additions: QTE overlay with red gradient and pulse animation, meter overlay with blue gradient and smooth animations
+  - Updated keyboard controls: Space bar now works for QTE response and meter clicking in addition to existing cast/reel
+  - Balance tuning: Set base meter speed to 0.4 with 0.8 multiplier (80% increase for largest fish) for good difficulty curve
+  - Updated button states: "Reel In" button enabled during both `hooked` (QTE) and `minigame` (meter) phases
+  - Created planning document: `tasks/fishing-minigame-plan.md` with full implementation details and testing checklist
+  - Testing confirmed: QTE timer works correctly, meter oscillates smoothly, fish escape on failures, successful catches still grant full rewards
+- Documentation: Created comprehensive `README.md` with gameplay instructions, controls, technical details, and project structure
+- Next steps: Add sound effects for QTE urgency, meter ticking, success/failure feedback; consider particle effects for successful catches; fine-tune difficulty balance based on player feedback

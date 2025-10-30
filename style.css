@@ -360,6 +360,158 @@ body {
   }
 }
 
+/* QTE Overlay Styles */
+.qte-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 12, 24, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 40;
+  animation: fadeIn 0.2s ease;
+}
+
+.qte-content {
+  background: linear-gradient(160deg, rgba(220, 38, 38, 0.95), rgba(185, 28, 28, 0.9));
+  border-radius: 1.5rem;
+  padding: 2rem 3rem;
+  box-shadow: 0 20px 60px rgba(220, 38, 38, 0.5);
+  text-align: center;
+  animation: pulseQTE 0.6s ease-in-out infinite;
+}
+
+.qte-title {
+  margin: 0 0 1.5rem 0;
+  font-size: 3rem;
+  font-weight: 900;
+  color: #fef2f2;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.1em;
+}
+
+.qte-timer-container {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 999px;
+  height: 20px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.qte-timer-bar {
+  background: linear-gradient(90deg, #10b981, #fbbf24, #ef4444);
+  height: 100%;
+  width: 100%;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+}
+
+.qte-hint {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #fef2f2;
+  opacity: 0.9;
+}
+
+@keyframes pulseQTE {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Meter Mini-Game Overlay Styles */
+.meter-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 12, 24, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 40;
+  animation: fadeIn 0.3s ease;
+}
+
+.meter-container {
+  background: linear-gradient(160deg, rgba(15, 48, 80, 0.95), rgba(13, 33, 67, 0.9));
+  border-radius: 1.5rem;
+  padding: 2.5rem 3rem;
+  box-shadow: 0 20px 60px rgba(37, 99, 235, 0.5);
+  text-align: center;
+  min-width: 400px;
+  max-width: 500px;
+}
+
+.meter-title {
+  margin: 0 0 2rem 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #e2ecff;
+}
+
+.meter-bar-container {
+  margin-bottom: 1.5rem;
+}
+
+.meter-bar {
+  position: relative;
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 12px;
+  height: 50px;
+  overflow: hidden;
+  border: 3px solid rgba(148, 197, 255, 0.3);
+}
+
+.meter-target-zone {
+  position: absolute;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.5), rgba(16, 185, 129, 0.3));
+  height: 100%;
+  border-left: 3px solid #10b981;
+  border-right: 3px solid #10b981;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.meter-indicator {
+  position: absolute;
+  background: linear-gradient(180deg, #60a5fa, #3b82f6);
+  width: 8px;
+  height: 100%;
+  left: 0;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.8);
+  transition: left 0.05s linear;
+}
+
+.meter-hint {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #e2ecff;
+  opacity: 0.9;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Success/Failure Flash Animations */
+@keyframes flashSuccess {
+  0%, 100% { background: transparent; }
+  50% { background: rgba(16, 185, 129, 0.3); }
+}
+
+@keyframes flashFailure {
+  0%, 100% { background: transparent; }
+  50% { background: rgba(239, 68, 68, 0.3); }
+}
+
+.flash-success {
+  animation: flashSuccess 0.5s ease;
+}
+
+.flash-failure {
+  animation: flashFailure 0.5s ease;
+}
+
 @media (max-width: 700px) {
   .game-shell {
     padding: 1rem;
@@ -385,5 +537,22 @@ body {
 
   .catch-actions {
     justify-content: center;
+  }
+
+  .qte-content {
+    padding: 1.5rem 2rem;
+  }
+
+  .qte-title {
+    font-size: 2rem;
+  }
+
+  .meter-container {
+    min-width: auto;
+    padding: 1.5rem 2rem;
+  }
+
+  .meter-title {
+    font-size: 1.5rem;
   }
 }

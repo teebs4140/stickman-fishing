@@ -18,6 +18,11 @@ function startGame() {
   const catchStats = document.getElementById("catch-stats");
   const closeCatchBtn = document.getElementById("close-catch-btn");
   const sellCatchBtn = document.getElementById("sell-fish-btn");
+  const qteOverlay = document.getElementById("qte-overlay");
+  const qteTimerBar = document.getElementById("qte-timer-bar");
+  const meterOverlay = document.getElementById("meter-overlay");
+  const meterTargetZone = document.getElementById("meter-target-zone");
+  const meterIndicator = document.getElementById("meter-indicator");
 
   if (
     !canvas ||
@@ -37,7 +42,12 @@ function startGame() {
     !catchName ||
     !catchStats ||
     !closeCatchBtn ||
-    !sellCatchBtn
+    !sellCatchBtn ||
+    !qteOverlay ||
+    !qteTimerBar ||
+    !meterOverlay ||
+    !meterTargetZone ||
+    !meterIndicator
   ) {
     console.error("Fishing game failed to initialize: missing required DOM nodes.");
     return;
@@ -50,6 +60,12 @@ function startGame() {
     idleBobberRange: 6,
     hookedBobberRange: 16,
     hookDelayRangeMs: [2200, 5200],
+    qteTimeWindowMs: 2500,
+    meterSpeed: {
+      base: 0.4,
+      multiplier: 0.8, // 80% speed increase for largest fish
+    },
+    targetZone: { start: 60, end: 75 },
   };
 
   const RARITY_ORDER = ["Common", "Uncommon", "Rare", "Epic", "Legendary"];
@@ -110,11 +126,18 @@ function startGame() {
   const state = {
     coins: 0,
     baitLevel: 1,
-    linePhase: "idle", // idle | casting | waiting | hooked | reeling
+    linePhase: "idle", // idle | casting | waiting | hooked | minigame | reeling
     castTimer: 0,
     reelTimer: 0,
     hookDelay: 0,
     hookTimer: 0,
+    qteTimer: 0,
+    qteActive: false,
+    meterProgress: 0,
+    meterActive: false,
+    meterSpeed: 1,
+    meterDirection: 1,
+    meterPasses: 0,
     bobber: {
       baseX: canvas.width * 0.7,
       baseY: CONFIG.waterline + 30,
@@ -454,7 +477,7 @@ function startGame() {
     const tier = getBaitTier();
     baitLevelLabel.textContent = `Lv. ${tier.level} | ${tier.name}`;
     castButton.disabled = state.linePhase !== "idle";
-    reelButton.disabled = state.linePhase !== "hooked";
+    reelButton.disabled = state.linePhase !== "hooked" && state.linePhase !== "minigame";
 
     const nextTier = getNextBaitTier();
     if (nextTier) {
@@ -490,11 +513,14 @@ function startGame() {
   }
 
   function reelLine() {
-    if (state.linePhase !== "hooked") return;
-    state.linePhase = "reeling";
-    state.reelTimer = 0;
-    setStatus("Reeling in...");
-    updateUI();
+    if (state.linePhase === "hooked" && state.qteActive) {
+      // QTE succeeded - transition to meter minigame
+      hideQTEOverlay();
+      startMeterMinigame();
+    } else if (state.linePhase === "minigame" && state.meterActive) {
+      // Check if click was in target zone
+      checkMeterTiming();
+    }
   }
 
   function upgradeBait() {
@@ -563,6 +589,48 @@ function startGame() {
       case "hooked": {
         const franticBob = Math.sin(performance.now() * 0.02) * CONFIG.hookedBobberRange;
         state.bobber.y = state.bobber.baseY + franticBob;
+
+        // Start QTE if not already active
+        if (!state.qteActive) {
+          state.qteActive = true;
+          state.qteTimer = CONFIG.qteTimeWindowMs;
+          showQTEOverlay();
+        }
+
+        // Update QTE timer
+        state.qteTimer -= dt;
+        updateQTEDisplay();
+
+        // Check if QTE timer expired
+        if (state.qteTimer <= 0) {
+          fishEscaped("Too slow! The fish got away.");
+        }
+        break;
+      }
+      case "minigame": {
+        const gentleBob = Math.sin(performance.now() * 0.0035) * CONFIG.idleBobberRange;
+        state.bobber.y = state.bobber.baseY + gentleBob;
+
+        // Update meter progress with direction
+        state.meterProgress += state.meterSpeed * (dt / 1000) * 100 * state.meterDirection;
+
+        // Bounce at boundaries
+        if (state.meterProgress >= 100) {
+          state.meterProgress = 100;
+          state.meterDirection = -1;
+          state.meterPasses += 0.5; // Half pass completed
+        } else if (state.meterProgress <= 0) {
+          state.meterProgress = 0;
+          state.meterDirection = 1;
+          state.meterPasses += 0.5; // Full cycle completed
+        }
+
+        // Check if player has had 2 full attempts (up and down)
+        if (state.meterPasses >= 2) {
+          fishEscaped("Too late! The fish broke free.");
+        }
+
+        updateMeterDisplay();
         break;
       }
       case "reeling": {
@@ -852,6 +920,82 @@ function startGame() {
     ctx.fill();
   }
 
+  function showQTEOverlay() {
+    qteOverlay.classList.remove("hidden");
+    qteTimerBar.style.width = "100%";
+    setStatus("Quick! Reel it in!");
+  }
+
+  function hideQTEOverlay() {
+    qteOverlay.classList.add("hidden");
+    state.qteActive = false;
+    state.qteTimer = 0;
+  }
+
+  function updateQTEDisplay() {
+    const percentage = Math.max(0, (state.qteTimer / CONFIG.qteTimeWindowMs) * 100);
+    qteTimerBar.style.width = `${percentage}%`;
+  }
+
+  function startMeterMinigame() {
+    if (!state.pendingCatch) return;
+
+    // Calculate meter speed based on fish size (multiplicative scaling)
+    const fishSizeRatio = state.pendingCatch.length / (state.pendingCatch.lengthRange?.[1] ?? 100);
+    state.meterSpeed = CONFIG.meterSpeed.base * (1 + fishSizeRatio * CONFIG.meterSpeed.multiplier);
+    state.meterProgress = 0;
+    state.meterActive = true;
+    state.meterDirection = 1;
+    state.meterPasses = 0;
+    state.linePhase = "minigame";
+
+    // Position target zone
+    meterTargetZone.style.left = `${CONFIG.targetZone.start}%`;
+    meterTargetZone.style.width = `${CONFIG.targetZone.end - CONFIG.targetZone.start}%`;
+
+    meterOverlay.classList.remove("hidden");
+    setStatus("Time your click!");
+    updateUI();
+  }
+
+  function hideMeterOverlay() {
+    meterOverlay.classList.add("hidden");
+    state.meterActive = false;
+    state.meterProgress = 0;
+    state.meterDirection = 1;
+    state.meterPasses = 0;
+  }
+
+  function updateMeterDisplay() {
+    meterIndicator.style.left = `${state.meterProgress}%`;
+  }
+
+  function checkMeterTiming() {
+    const inTargetZone =
+      state.meterProgress >= CONFIG.targetZone.start &&
+      state.meterProgress <= CONFIG.targetZone.end;
+
+    hideMeterOverlay();
+
+    if (inTargetZone) {
+      // Success! Start reeling
+      state.linePhase = "reeling";
+      state.reelTimer = 0;
+      setStatus("Perfect! Reeling in...");
+      updateUI();
+    } else {
+      // Missed the zone
+      fishEscaped("Missed! The fish broke free.");
+    }
+  }
+
+  function fishEscaped(message) {
+    hideQTEOverlay();
+    hideMeterOverlay();
+    setStatus(message);
+    resetLine();
+  }
+
   function update(timestamp) {
     const dt = timestamp - lastTimestamp;
     lastTimestamp = timestamp;
@@ -870,6 +1014,13 @@ function startGame() {
     catchOverlay.addEventListener("click", (event) => {
       if (event.target === catchOverlay) {
         hideCatchOverlay();
+      }
+    });
+
+    // Meter mini-game click handler
+    meterOverlay.addEventListener("click", () => {
+      if (state.linePhase === "minigame" && state.meterActive) {
+        checkMeterTiming();
       }
     });
 
@@ -907,6 +1058,8 @@ function startGame() {
           castLine();
         } else if (state.linePhase === "hooked") {
           reelLine();
+        } else if (state.linePhase === "minigame") {
+          checkMeterTiming();
         }
       } else if (event.code === "Escape") {
         toggleCollectionPanel(false);
