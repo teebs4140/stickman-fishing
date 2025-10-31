@@ -242,6 +242,11 @@ body {
   color: #fbbf24;
 }
 
+.rarity-Mythic {
+  color: #f0abfc;
+  text-shadow: 0 0 8px rgba(240, 171, 252, 0.6);
+}
+
 .catch-overlay {
   position: fixed;
   inset: 0;

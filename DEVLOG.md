@@ -31,7 +31,11 @@
 - Layout update: removed desktop letterboxing and let the game shell scale to the full viewport (using 100dvh/100vw) so the fishing scene fills the entire device screen.
 - Collection update: added thumb art beside each fish entry by reusing the SVG generator so the showcase list now highlights what every species looks like at a glance.
 - UX update: collection entries are interactive; clicking or pressing Enter/Space opens the overlay with a full-size fish card for that species.
-- Economy update: collection overlay now offers a "Sell One" action (and keyboard `S`) to trade surplus fish for coins, with rarity-weighted payouts.
+- Economy update: collection overlay now offers a “Sell One” action (and keyboard `S`) to trade surplus fish for coins, with rarity-weighted payouts.
+- Visual polish: layered animated background fish into the water to keep the lake feeling alive between casts.
+- Balance tweak: Mythic Lure upgrade now costs 420 coins, fixing the free tier jump from level 4 to 5 bait.
+- Content update: introduced level 6 `Cosmic Resonator` bait with Rainbow, Diamond, and Dark Matter fish (complete with new art and high-value rewards).
+- Rarity update: added Mythic tier atop existing Epic/Legendary, retuned bait odds, and restyled UI so Rainbow, Diamond, and Dark Matter fish stand out.
 
 ### 2025-10-30
 - **Major Feature: Fishing Mini-Game Challenge System**
@@ -59,4 +63,8 @@
   - Created planning document: `tasks/fishing-minigame-plan.md` with full implementation details and testing checklist
   - Testing confirmed: QTE timer works correctly, meter oscillates smoothly, fish escape on failures, successful catches still grant full rewards
 - Documentation: Created comprehensive `README.md` with gameplay instructions, controls, technical details, and project structure
+- Content addition: Added **Phantom Shark** as third Legendary fish exclusive to level 5 Mythic Lure
+  - Stats: 195 coins base value, 160-220cm length range
+  - Classic shark appearance: grey body (#64748b), white belly (#f1f5f9), dark fins (#475569)
+  - Brings total fish species count to 15
 - Next steps: Add sound effects for QTE urgency, meter ticking, success/failure feedback; consider particle effects for successful catches; fine-tune difficulty balance based on player feedback

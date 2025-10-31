@@ -15,12 +15,12 @@ A browser-based fishing game built with vanilla HTML5 Canvas, CSS, and JavaScrip
 ### Progression System
 - **5 Bait Tiers**: Upgrade from Basic Bait to Mythic Lure
 - **Currency Economy**: Earn coins from catches, spend on upgrades and sell duplicates
-- **14 Unique Fish Species** across 5 rarity tiers:
+- **15 Unique Fish Species** across 5 rarity tiers:
   - Common (Minnow, Sunfish, Perch)
   - Uncommon (Bass, Catfish, Pike)
   - Rare (Koi, Salmon, Eel)
   - Epic (Angler, Swordfish, Dragonfin)
-  - Legendary (Leviathan, Starlit Ray)
+  - Legendary (Leviathan, Starlit Ray, Phantom Shark)
 
 ### Collection System
 - **Fishing Log**: Track every species you've caught

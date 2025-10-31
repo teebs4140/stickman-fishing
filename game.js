@@ -68,7 +68,7 @@ function startGame() {
     targetZone: { start: 60, end: 75 },
   };
 
-  const RARITY_ORDER = ["Common", "Uncommon", "Rare", "Epic", "Legendary"];
+  const RARITY_ORDER = ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"];
 
   const FISH_POOL = [
     { id: "minnow", name: "Lively Minnow", rarity: "Common", baseValue: 5, minBait: 1, lengthRange: [18, 26] },
@@ -85,14 +85,19 @@ function startGame() {
     { id: "dragonfin", name: "Dragonfin Carp", rarity: "Epic", baseValue: 115, minBait: 4, lengthRange: [65, 100] },
     { id: "leviathan", name: "Echoing Leviathan", rarity: "Legendary", baseValue: 180, minBait: 5, lengthRange: [150, 210] },
     { id: "starlit", name: "Starlit Ray", rarity: "Legendary", baseValue: 210, minBait: 5, lengthRange: [130, 190] },
+    { id: "shark", name: "Phantom Shark", rarity: "Legendary", baseValue: 195, minBait: 5, lengthRange: [160, 220] },
+    { id: "rainbow", name: "Rainbow Fish", rarity: "Mythic", baseValue: 165, minBait: 6, lengthRange: [80, 118] },
+    { id: "diamond", name: "Diamond Fish", rarity: "Mythic", baseValue: 230, minBait: 6, lengthRange: [90, 135] },
+    { id: "darkmatter", name: "Dark Matter Fish", rarity: "Mythic", baseValue: 260, minBait: 6, lengthRange: [72, 128] },
   ];
 
   const BAIT_TIERS = [
-    { level: 1, name: "Basic Bait", upgradeCost: 40, odds: { Common: 0.82, Uncommon: 0.16, Rare: 0.02, Epic: 0, Legendary: 0 } },
-    { level: 2, name: "Feather Lure", upgradeCost: 90, odds: { Common: 0.68, Uncommon: 0.24, Rare: 0.07, Epic: 0.01, Legendary: 0 } },
-    { level: 3, name: "Shimmer Spinner", upgradeCost: 160, odds: { Common: 0.48, Uncommon: 0.32, Rare: 0.15, Epic: 0.04, Legendary: 0.01 } },
-    { level: 4, name: "Prism Jig", upgradeCost: 260, odds: { Common: 0.32, Uncommon: 0.36, Rare: 0.2, Epic: 0.1, Legendary: 0.02 } },
-    { level: 5, name: "Mythic Lure", upgradeCost: null, odds: { Common: 0.2, Uncommon: 0.34, Rare: 0.24, Epic: 0.14, Legendary: 0.08 } },
+    { level: 1, name: "Basic Bait", upgradeCost: 40, odds: { Common: 0.82, Uncommon: 0.16, Rare: 0.02, Epic: 0, Legendary: 0, Mythic: 0 } },
+    { level: 2, name: "Feather Lure", upgradeCost: 90, odds: { Common: 0.68, Uncommon: 0.24, Rare: 0.07, Epic: 0.01, Legendary: 0, Mythic: 0 } },
+    { level: 3, name: "Shimmer Spinner", upgradeCost: 160, odds: { Common: 0.48, Uncommon: 0.32, Rare: 0.15, Epic: 0.05, Legendary: 0, Mythic: 0 } },
+    { level: 4, name: "Prism Jig", upgradeCost: 260, odds: { Common: 0.32, Uncommon: 0.36, Rare: 0.2, Epic: 0.1, Legendary: 0.02, Mythic: 0 } },
+    { level: 5, name: "Mythic Lure", upgradeCost: 420, odds: { Common: 0.2, Uncommon: 0.34, Rare: 0.24, Epic: 0.14, Legendary: 0.06, Mythic: 0.02 } },
+    { level: 6, name: "Cosmic Resonator", upgradeCost: 620, odds: { Common: 0.12, Uncommon: 0.28, Rare: 0.24, Epic: 0.14, Legendary: 0.12, Mythic: 0.1 } },
   ];
 
   const FISH_ART = {
@@ -110,6 +115,10 @@ function startGame() {
     dragonfin: { body: "#f472b6", belly: "#fbcfe8", fin: "#db2777", pattern: "#ec4899" },
     leviathan: { body: "#6366f1", belly: "#c7d2fe", fin: "#4338ca", pattern: "#818cf8" },
     starlit: { body: "#fde68a", belly: "#fef3c7", fin: "#fbbf24", pattern: "#fcd34d" },
+    shark: { body: "#64748b", belly: "#f1f5f9", fin: "#475569", pattern: "#94a3b8" },
+    rainbow: { body: "#f472b6", belly: "#fdf2f8", fin: "#22d3ee", pattern: "#facc15" },
+    diamond: { body: "#bae6fd", belly: "#f8fafc", fin: "#38bdf8", pattern: "#e0f2fe" },
+    darkmatter: { body: "#5b21b6", belly: "#a855f7", fin: "#1e1b4b", pattern: "#c084fc" },
   };
 
   const DEFAULT_FISH_ART = { body: "#38bdf8", belly: "#bae6fd", fin: "#0284c7", pattern: "#0ea5e9" };
@@ -146,6 +155,7 @@ function startGame() {
     },
     pendingCatch: null,
     collection: new Map(),
+    backgroundFish: [],
   };
 
   const stickman = {
@@ -160,7 +170,6 @@ function startGame() {
   let lastTimestamp = performance.now();
   let catchOverlayTimer = null;
   let overlayMode = "hidden";
-  let currentCollectionOverlayId = null;
 
   function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
@@ -170,12 +179,44 @@ function startGame() {
     return Math.random() * (max - min) + min;
   }
 
+  function randomChoice(items) {
+    return items[Math.floor(Math.random() * items.length)];
+  }
+
+  const BACKGROUND_FISH = {
+    count: 10,
+    minSpeed: 24,
+    maxSpeed: 60,
+    sizeRange: [0.55, 1.25],
+    colors: [
+      { body: "#4f83ff", accent: "#d4e4ff" },
+      { body: "#1dd3b0", accent: "#a7f3d0" },
+      { body: "#fb7185", accent: "#fee2e2" },
+      { body: "#f59e0b", accent: "#fde68a" },
+      { body: "#6366f1", accent: "#c7d2fe" },
+    ],
+  };
+
   function getFishPalette(fishId) {
     return FISH_ART[fishId] ?? DEFAULT_FISH_ART;
   }
 
   function createFishImageUrl(catchResult) {
     const { body, belly, fin, pattern } = getFishPalette(catchResult.id);
+    const isShark = catchResult.id === "shark";
+
+    // Sharp triangular teeth for shark (positioned at front/mouth)
+    const sharkTeeth = isShark ? `
+      <polygon points="8,32 14,36 8,40" fill="#f8fafc" opacity="0.95"/>
+      <polygon points="14,30 20,34 14,38" fill="#f8fafc" opacity="0.95"/>
+      <polygon points="20,28 26,32 20,36" fill="#f8fafc" opacity="0.95"/>
+      <polygon points="26,30 32,34 26,38" fill="#f8fafc" opacity="0.95"/>
+      <polygon points="14,38 20,42 14,46" fill="#f8fafc" opacity="0.95"/>
+      <polygon points="20,40 26,44 20,48" fill="#f8fafc" opacity="0.95"/>
+      <polygon points="26,42 32,46 26,50" fill="#f8fafc" opacity="0.95"/>
+      <polygon points="8,44 14,48 8,52" fill="#f8fafc" opacity="0.95"/>
+    ` : '';
+
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120">
         <defs>
@@ -191,6 +232,7 @@ function startGame() {
           <ellipse cx="92" cy="42" rx="72" ry="24" fill="${belly}" opacity="0.9"/>
           <path d="M42 20 Q70 6 110 18" stroke="${pattern}" stroke-width="6" fill="none" opacity="0.5"/>
           <path d="M40 56 Q70 70 108 60" stroke="${pattern}" stroke-width="6" fill="none" opacity="0.45"/>
+          ${sharkTeeth}
           <polygon points="170,20 190,38 170,56" fill="${fin}"/>
           <circle cx="134" cy="34" r="11" fill="#0f172a" opacity="0.88"/>
           <circle cx="137" cy="32" r="5.5" fill="#f8fafc"/>
@@ -284,6 +326,119 @@ function startGame() {
     );
   }
 
+  function createBackgroundFish(initial = false) {
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const baseSpeed = randomRange(BACKGROUND_FISH.minSpeed, BACKGROUND_FISH.maxSpeed);
+    const scale = randomRange(...BACKGROUND_FISH.sizeRange);
+    const color = randomChoice(BACKGROUND_FISH.colors);
+    const margin = canvas.width * 0.18;
+    const x = initial
+      ? randomRange(0, canvas.width)
+      : dir > 0
+      ? -margin
+      : canvas.width + margin;
+    const y = randomRange(CONFIG.waterline + 25, canvas.height - 45);
+    const wavePhase = Math.random() * Math.PI * 2;
+    return {
+      x,
+      y,
+      renderY: y,
+      dir,
+      baseSpeed,
+      speed: baseSpeed * dir,
+      scale,
+      color,
+      wavePhase,
+    };
+  }
+
+  function recycleBackgroundFish(fish, direction) {
+    const dir = direction ?? (Math.random() < 0.5 ? 1 : -1);
+    fish.dir = dir;
+    fish.baseSpeed = randomRange(BACKGROUND_FISH.minSpeed, BACKGROUND_FISH.maxSpeed);
+    fish.speed = fish.baseSpeed * dir;
+    fish.scale = randomRange(...BACKGROUND_FISH.sizeRange);
+    fish.color = randomChoice(BACKGROUND_FISH.colors);
+    fish.y = randomRange(CONFIG.waterline + 25, canvas.height - 45);
+    fish.renderY = fish.y;
+    fish.wavePhase = Math.random() * Math.PI * 2;
+    const margin = canvas.width * 0.18;
+    fish.x = dir > 0 ? -margin : canvas.width + margin;
+  }
+
+  function initializeBackgroundFish(forceReset = false) {
+    if (forceReset) {
+      state.backgroundFish.length = 0;
+    }
+    const desired = BACKGROUND_FISH.count;
+    while (state.backgroundFish.length < desired) {
+      state.backgroundFish.push(createBackgroundFish(true));
+    }
+    if (!forceReset) {
+      state.backgroundFish.forEach((fish) => {
+        fish.y = randomRange(CONFIG.waterline + 25, canvas.height - 45);
+        fish.renderY = fish.y;
+      });
+    }
+  }
+
+  function updateBackgroundFish(dt) {
+    const dtSeconds = dt / 1000;
+    const margin = canvas.width * 0.22;
+    state.backgroundFish.forEach((fish) => {
+      fish.x += fish.speed * dtSeconds;
+      fish.wavePhase += dtSeconds * fish.baseSpeed * 0.8;
+      fish.renderY = fish.y + Math.sin(fish.wavePhase) * 6 * fish.scale;
+
+      if (fish.dir > 0 && fish.x - margin > canvas.width) {
+        recycleBackgroundFish(fish, -1);
+      } else if (fish.dir < 0 && fish.x + margin < 0) {
+        recycleBackgroundFish(fish, 1);
+      }
+    });
+  }
+
+  function drawBackgroundFish() {
+    ctx.save();
+    state.backgroundFish.forEach((fish) => {
+      ctx.save();
+      ctx.translate(fish.x, fish.renderY);
+      if (fish.dir < 0) {
+        ctx.scale(-1, 1);
+      }
+      const bodyLength = 26 * fish.scale;
+      const bodyHeight = 10 * fish.scale;
+      const tailLength = 12 * fish.scale;
+      const finHeight = 6 * fish.scale;
+
+      ctx.fillStyle = fish.color.accent;
+      ctx.beginPath();
+      ctx.moveTo(-bodyLength / 2 - tailLength, 0);
+      ctx.lineTo(-bodyLength / 2, finHeight);
+      ctx.lineTo(-bodyLength / 2, -finHeight);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = fish.color.body;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, bodyLength / 2, bodyHeight / 2, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255,255,255,0.7)";
+      ctx.beginPath();
+      ctx.ellipse(bodyLength / 4, -bodyHeight * 0.2, bodyLength * 0.15, bodyHeight * 0.3, 0, 0, Math.PI);
+      ctx.fill();
+
+      ctx.fillStyle = "#0f172a";
+      ctx.beginPath();
+      ctx.arc(bodyLength / 3, -bodyHeight * 0.15, bodyHeight * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    });
+    ctx.restore();
+  }
+
   function renderFishOverlay({
     fish,
     title,
@@ -334,7 +489,6 @@ function startGame() {
   }
 
   function showCatchOverlay(catchResult) {
-    currentCollectionOverlayId = null;
     renderFishOverlay({
       fish: catchResult,
       title: `${catchResult.rarity} ${catchResult.name}`,
@@ -368,7 +522,6 @@ function startGame() {
       canSell: entry.count > 0,
       onSell: entry.count > 0 ? () => sellFishFromCollection(entry.fish.id) : null,
     });
-    currentCollectionOverlayId = entry.fish.id;
   }
 
   function showCollectionFishOverlayById(fishId) {
@@ -413,7 +566,6 @@ function startGame() {
     sellCatchBtn.onclick = null;
     overlayMode = "hidden";
     catchOverlay.dataset.mode = "hidden";
-    currentCollectionOverlayId = null;
   }
 
   function drawDock() {
@@ -466,6 +618,8 @@ function startGame() {
       state.bobber.x = state.bobber.baseX;
       state.bobber.y = state.bobber.baseY;
     }
+
+    initializeBackgroundFish(true);
   }
 
   function setStatus(text) {
@@ -481,8 +635,11 @@ function startGame() {
 
     const nextTier = getNextBaitTier();
     if (nextTier) {
+      const shortfall = Math.max(0, nextTier.upgradeCost - state.coins);
       upgradeButton.disabled = state.coins < nextTier.upgradeCost;
-      upgradeButton.textContent = `Upgrade Bait (${nextTier.upgradeCost} coins)`;
+      upgradeButton.textContent = `Upgrade → Lv.${nextTier.level} (${nextTier.upgradeCost} coins${
+        shortfall > 0 ? `, need ${shortfall} more` : ""
+      })`;
     } else {
       upgradeButton.disabled = true;
       upgradeButton.textContent = "Bait Maxed";
@@ -773,6 +930,7 @@ function startGame() {
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
+    drawBackgroundFish();
     drawDock();
     drawStickman();
     drawFishingLine();
@@ -1000,6 +1158,7 @@ function startGame() {
     const dt = timestamp - lastTimestamp;
     lastTimestamp = timestamp;
     updateLine(dt);
+    updateBackgroundFish(dt);
     draw();
     requestAnimationFrame(update);
   }
