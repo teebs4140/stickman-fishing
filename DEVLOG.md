@@ -35,7 +35,8 @@
 - Visual polish: layered animated background fish into the water to keep the lake feeling alive between casts.
 - Balance tweak: Mythic Lure upgrade now costs 420 coins, fixing the free tier jump from level 4 to 5 bait.
 - Content update: introduced level 6 `Cosmic Resonator` bait with Rainbow, Diamond, and Dark Matter fish (complete with new art and high-value rewards).
-- Rarity update: added Mythic tier atop existing Epic/Legendary, retuned bait odds, and restyled UI so Rainbow, Diamond, and Dark Matter fish stand out.
+- Rarity update: added Mythic tier atop existing Epic/Legendary, retuned bait odds, and restyled UI (now vivid red) so Rainbow, Diamond, and Dark Matter fish stand out.
+- Customization shop: players can spend coins on hats/outfits, equip looks instantly, and see the stickman render update in real time.
 
 ### 2025-10-30
 - **Major Feature: Fishing Mini-Game Challenge System**

@@ -31,6 +31,7 @@
       <button id="reel-btn" disabled>Reel In</button>
       <button id="upgrade-btn">Upgrade Bait</button>
       <button id="toggle-collection-btn">View Collection</button>
+      <button id="customize-btn">Customize</button>
     </nav>
 
     <aside id="collection-panel" class="panel hidden" aria-live="polite">
@@ -43,6 +44,21 @@
       </ul>
     </aside>
   </main>
+
+  <aside id="customize-panel" class="panel hidden" aria-live="polite">
+    <header>
+      <h2>Customize Stickman</h2>
+      <button id="close-customize-btn" aria-label="Close customize panel">X</button>
+    </header>
+    <section class="customize-section">
+      <h3>Hats</h3>
+      <ul id="hat-list" class="customize-list"></ul>
+    </section>
+    <section class="customize-section">
+      <h3>Outfits</h3>
+      <ul id="outfit-list" class="customize-list"></ul>
+    </section>
+  </aside>
 
   <div id="catch-overlay" class="catch-overlay hidden" role="dialog" aria-modal="true" aria-live="assertive">
     <div class="catch-card">

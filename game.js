@@ -18,6 +18,11 @@ function startGame() {
   const catchStats = document.getElementById("catch-stats");
   const closeCatchBtn = document.getElementById("close-catch-btn");
   const sellCatchBtn = document.getElementById("sell-fish-btn");
+  const customizeButton = document.getElementById("customize-btn");
+  const customizePanel = document.getElementById("customize-panel");
+  const closeCustomizeButton = document.getElementById("close-customize-btn");
+  const hatList = document.getElementById("hat-list");
+  const outfitList = document.getElementById("outfit-list");
   const qteOverlay = document.getElementById("qte-overlay");
   const qteTimerBar = document.getElementById("qte-timer-bar");
   const meterOverlay = document.getElementById("meter-overlay");
@@ -43,6 +48,11 @@ function startGame() {
     !catchStats ||
     !closeCatchBtn ||
     !sellCatchBtn ||
+    !customizeButton ||
+    !customizePanel ||
+    !closeCustomizeButton ||
+    !hatList ||
+    !outfitList ||
     !qteOverlay ||
     !qteTimerBar ||
     !meterOverlay ||
@@ -100,6 +110,77 @@ function startGame() {
     { level: 6, name: "Cosmic Resonator", upgradeCost: 620, odds: { Common: 0.12, Uncommon: 0.28, Rare: 0.24, Epic: 0.14, Legendary: 0.12, Mythic: 0.1 } },
   ];
 
+  const COSMETICS = {
+    hats: [
+      {
+        id: "default",
+        name: "Classic Blue Cap",
+        cost: 0,
+        colors: { top: "#1d4ed8", brim: "#1d4ed8" },
+        description: "Simple cap that keeps the sun out of your eyes.",
+      },
+      {
+        id: "sunset",
+        name: "Sunset Beanie",
+        cost: 180,
+        colors: { top: "#f97316", brim: "#fb7185" },
+        description: "Warm hues inspired by evening fishing trips.",
+      },
+      {
+        id: "forest",
+        name: "Forest Bucket",
+        cost: 260,
+        colors: { top: "#166534", brim: "#22c55e" },
+        description: "Blends in with the pines when you scout new spots.",
+      },
+      {
+        id: "cosmic",
+        name: "Cosmic Halo",
+        cost: 360,
+        colors: { top: "#9333ea", brim: "#f472b6" },
+        description: "Shimmering band that glows with cosmic energy.",
+      },
+    ],
+    outfits: [
+      {
+        id: "default",
+        name: "Standard Lines",
+        cost: 0,
+        stroke: "#0f172a",
+        accent: "#2563eb",
+        accentType: "none",
+        description: "Reliable black lines—ready for any catch.",
+      },
+      {
+        id: "angler",
+        name: "Angler Jacket",
+        cost: 220,
+        stroke: "#1f2937",
+        accent: "#16a34a",
+        accentType: "vest",
+        description: "Utility vest packed with imaginary tackle.",
+      },
+      {
+        id: "crimson",
+        name: "Crimson Sash",
+        cost: 280,
+        stroke: "#7f1d1d",
+        accent: "#f97316",
+        accentType: "sash",
+        description: "Bold sash that shows you mean fishing business.",
+      },
+      {
+        id: "midnight",
+        name: "Midnight Slicker",
+        cost: 340,
+        stroke: "#0f172a",
+        accent: "#3b82f6",
+        accentType: "coat",
+        description: "Storm-ready coat for late-night legendary hunts.",
+      },
+    ],
+  };
+
   const FISH_ART = {
     minnow: { body: "#7dd3fc", belly: "#dbeafe", fin: "#0ea5e9", pattern: "#38bdf8" },
     sunny: { body: "#facc15", belly: "#fef3c7", fin: "#ea580c", pattern: "#f97316" },
@@ -156,6 +237,14 @@ function startGame() {
     pendingCatch: null,
     collection: new Map(),
     backgroundFish: [],
+    customization: {
+      owned: {
+        hats: new Set(["default"]),
+        outfits: new Set(["default"]),
+      },
+      equippedHat: "default",
+      equippedOutfit: "default",
+    },
   };
 
   const stickman = {
@@ -324,6 +413,125 @@ function startGame() {
       entry.fish.baseValue,
       Math.round(entry.fish.baseValue * rarityMultiplier + bestBonus)
     );
+  }
+
+  function getCosmetics(type) {
+    return COSMETICS[type] ?? [];
+  }
+
+  function getCosmeticById(type, id) {
+    return getCosmetics(type).find((item) => item.id === id);
+  }
+
+  function isCosmeticOwned(type, id) {
+    return state.customization.owned[type]?.has(id);
+  }
+
+  function purchaseCosmetic(type, id) {
+    const item = getCosmeticById(type, id);
+    if (!item) return;
+    if (isCosmeticOwned(type, id)) {
+      setStatus(`${item.name} is already in your wardrobe.`);
+      return;
+    }
+    if (state.coins < item.cost) {
+      const shortfall = item.cost - state.coins;
+      setStatus(`Need ${shortfall} more coins to buy ${item.name}.`);
+      return;
+    }
+    state.coins -= item.cost;
+    state.customization.owned[type].add(id);
+    setStatus(`Purchased ${item.name}!`);
+    updateUI();
+    renderCustomizationUI();
+  }
+
+  function equipCosmetic(type, id) {
+    const item = getCosmeticById(type, id);
+    if (!item) return;
+    if (!isCosmeticOwned(type, id)) {
+      setStatus(`Buy ${item.name} before equipping it.`);
+      return;
+    }
+    const key = type === "hats" ? "equippedHat" : "equippedOutfit";
+    state.customization[key] = id;
+    setStatus(`${item.name} equipped! Looking sharp.`);
+    renderCustomizationUI();
+  }
+
+  function renderCustomizationList(listElement, items, type) {
+    if (!listElement) return;
+    listElement.innerHTML = "";
+    for (const item of items) {
+      const li = document.createElement("li");
+      li.className = "customize-item";
+
+      const info = document.createElement("div");
+      info.className = "customize-item-info";
+
+      const name = document.createElement("span");
+      name.textContent = item.name;
+      info.appendChild(name);
+
+      const desc = document.createElement("span");
+      desc.style.opacity = "0.8";
+      desc.style.fontSize = "0.82rem";
+      desc.textContent = item.description;
+      info.appendChild(desc);
+
+      if (isCosmeticOwned(type, item.id) && item.cost > 0) {
+        const owned = document.createElement("span");
+        owned.className = "owned-tag";
+        owned.textContent = "Owned";
+        info.appendChild(owned);
+      }
+
+      li.appendChild(info);
+
+      const actions = document.createElement("div");
+      actions.className = "customize-item-actions";
+
+      if (!isCosmeticOwned(type, item.id)) {
+        const buyBtn = document.createElement("button");
+        buyBtn.className = "buy";
+        buyBtn.textContent = `Buy (${item.cost} coins)`;
+        buyBtn.disabled = state.coins < item.cost;
+        buyBtn.addEventListener("click", () => purchaseCosmetic(type, item.id));
+        actions.appendChild(buyBtn);
+      }
+
+      const equipBtn = document.createElement("button");
+      equipBtn.className = "equip";
+      const currentEquipped =
+        type === "hats" ? state.customization.equippedHat : state.customization.equippedOutfit;
+      equipBtn.textContent = currentEquipped === item.id ? "Equipped" : "Equip";
+      equipBtn.disabled = currentEquipped === item.id || !isCosmeticOwned(type, item.id);
+      equipBtn.addEventListener("click", () => equipCosmetic(type, item.id));
+      actions.appendChild(equipBtn);
+
+      li.appendChild(actions);
+      listElement.appendChild(li);
+    }
+  }
+
+  function renderCustomizationUI() {
+    renderCustomizationList(hatList, getCosmetics("hats"), "hats");
+    renderCustomizationList(outfitList, getCosmetics("outfits"), "outfits");
+  }
+
+  function toggleCustomizePanel(forceOpen) {
+    const shouldOpen =
+      typeof forceOpen === "boolean"
+        ? forceOpen
+        : customizePanel.classList.contains("hidden");
+    if (shouldOpen) {
+      hideCatchOverlay();
+      collectionPanel.classList.add("hidden");
+      renderCustomizationUI();
+      customizePanel.classList.remove("hidden");
+    } else {
+      customizePanel.classList.add("hidden");
+    }
   }
 
   function createBackgroundFish(initial = false) {
@@ -644,6 +852,10 @@ function startGame() {
       upgradeButton.disabled = true;
       upgradeButton.textContent = "Bait Maxed";
     }
+
+    if (!customizePanel.classList.contains("hidden")) {
+      renderCustomizationUI();
+    }
   }
 
   function toggleCollectionPanel(forceOpen) {
@@ -654,6 +866,7 @@ function startGame() {
     if (shouldOpen) {
       hideCatchOverlay();
       renderCollection();
+      customizePanel.classList.add("hidden");
       collectionPanel.classList.remove("hidden");
     } else {
       collectionPanel.classList.add("hidden");
@@ -990,6 +1203,17 @@ function startGame() {
 
   function drawStickman() {
     const headRadius = stickman.headRadius;
+    const currentHat =
+      getCosmeticById("hats", state.customization.equippedHat) ||
+      getCosmeticById("hats", "default");
+    const currentOutfit =
+      getCosmeticById("outfits", state.customization.equippedOutfit) ||
+      getCosmeticById("outfits", "default");
+    const strokeColor = currentOutfit?.stroke ?? "#0f172a";
+    const accentColor = currentOutfit?.accent ?? "#2563eb";
+    const accentType = currentOutfit?.accentType ?? "none";
+    const hatTopColor = currentHat?.colors?.top ?? "#1d4ed8";
+    const hatBrimColor = currentHat?.colors?.brim ?? hatTopColor;
     const headCenterY = stickman.baseY - stickman.height + headRadius;
     const shoulderY = headCenterY + headRadius * 1.2;
     const hipY = stickman.baseY - stickman.height * 0.28;
@@ -1000,7 +1224,7 @@ function startGame() {
     ctx.lineJoin = "round";
 
     ctx.lineWidth = limbThickness;
-    ctx.strokeStyle = "#0f172a";
+    ctx.strokeStyle = strokeColor;
     ctx.beginPath();
     ctx.moveTo(stickman.x, shoulderY);
     ctx.lineTo(stickman.x, hipY);
@@ -1018,6 +1242,45 @@ function startGame() {
     ctx.lineTo(stickman.handX, stickman.handY);
     ctx.stroke();
 
+    if (accentType && accentType !== "none") {
+      ctx.save();
+      ctx.fillStyle = accentColor;
+      ctx.strokeStyle = accentColor;
+      switch (accentType) {
+        case "vest": {
+          const vestTop = shoulderY - headRadius * 0.2;
+          const vestBottom = hipY + limbThickness * 0.5;
+          const vestWidth = stickman.height * 0.28;
+          ctx.globalAlpha = 0.55;
+          ctx.fillRect(stickman.x - vestWidth / 2, vestTop, vestWidth, vestBottom - vestTop);
+          ctx.globalAlpha = 1;
+          break;
+        }
+        case "sash": {
+          ctx.lineWidth = limbThickness * 1.6;
+          ctx.globalAlpha = 0.7;
+          ctx.beginPath();
+          ctx.moveTo(stickman.x - stickman.height * 0.24, shoulderY);
+          ctx.lineTo(stickman.x + stickman.height * 0.18, hipY);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          break;
+        }
+        case "coat": {
+          const coatTop = shoulderY - limbThickness * 0.5;
+          const coatBottom = hipY + stickman.height * 0.18;
+          const coatWidth = stickman.height * 0.32;
+          ctx.globalAlpha = 0.6;
+          ctx.fillRect(stickman.x - coatWidth / 2, coatTop, coatWidth, coatBottom - coatTop);
+          ctx.globalAlpha = 1;
+          break;
+        }
+        default:
+          break;
+      }
+      ctx.restore();
+    }
+
     ctx.fillStyle = "#fde68a";
     ctx.beginPath();
     ctx.arc(stickman.x, headCenterY, headRadius, 0, Math.PI * 2);
@@ -1026,8 +1289,9 @@ function startGame() {
 
     const hatWidth = headRadius * 2.4;
     const hatHeight = headRadius * 0.8;
-    ctx.fillStyle = "#1d4ed8";
+    ctx.fillStyle = hatTopColor;
     ctx.fillRect(stickman.x - hatWidth / 2, headCenterY - headRadius * 1.35, hatWidth, hatHeight);
+    ctx.fillStyle = hatBrimColor;
     ctx.fillRect(
       stickman.x - hatWidth / 1.6,
       headCenterY - headRadius * 0.9,
@@ -1067,14 +1331,14 @@ function startGame() {
   }
 
   function drawBobber() {
-    const radius = Math.max(8, canvas.width * 0.011);
+    const radius = Math.max(5, canvas.width * 0.0085);
     ctx.fillStyle = "#f94144";
     ctx.beginPath();
     ctx.arc(state.bobber.x, state.bobber.y, radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = "#f9f9f9";
     ctx.beginPath();
-    ctx.arc(state.bobber.x, state.bobber.y - radius * 0.35, radius * 0.75, 0, Math.PI * 2);
+    ctx.arc(state.bobber.x, state.bobber.y - radius * 0.4, radius * 0.6, 0, Math.PI * 2);
     ctx.fill();
   }
 
@@ -1169,6 +1433,8 @@ function startGame() {
     upgradeButton.addEventListener("click", upgradeBait);
     toggleCollectionButton.addEventListener("click", () => toggleCollectionPanel());
     closeCollectionButton.addEventListener("click", () => toggleCollectionPanel(false));
+    customizeButton.addEventListener("click", () => toggleCustomizePanel());
+    closeCustomizeButton.addEventListener("click", () => toggleCustomizePanel(false));
     closeCatchBtn.addEventListener("click", () => hideCatchOverlay());
     catchOverlay.addEventListener("click", (event) => {
       if (event.target === catchOverlay) {
@@ -1212,6 +1478,14 @@ function startGame() {
         }
       }
 
+      if (!customizePanel.classList.contains("hidden")) {
+        if (event.code === "Escape") {
+          toggleCustomizePanel(false);
+          event.preventDefault();
+        }
+        return;
+      }
+
       if (event.code === "Space") {
         if (state.linePhase === "idle") {
           castLine();
@@ -1224,6 +1498,8 @@ function startGame() {
         toggleCollectionPanel(false);
       } else if (event.code === "KeyU") {
         upgradeBait();
+      } else if (event.code === "KeyC") {
+        toggleCustomizePanel();
       }
     });
   }
@@ -1232,6 +1508,7 @@ function startGame() {
     wireControls();
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
+    renderCustomizationUI();
     updateUI();
     requestAnimationFrame(update);
   }
