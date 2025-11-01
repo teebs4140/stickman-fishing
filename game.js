@@ -272,6 +272,22 @@ function startGame() {
     return items[Math.floor(Math.random() * items.length)];
   }
 
+  // Haptic feedback helper with feature detection
+  function hapticFeedback(pattern) {
+    if ("vibrate" in navigator) {
+      navigator.vibrate(pattern);
+    }
+  }
+
+  // Predefined haptic patterns
+  const HAPTIC = {
+    BITE: [50, 30, 50],           // Fish bite alert (QTE start)
+    SUCCESS: [30],                 // Successful meter hit
+    FAIL: [100, 50, 100],         // Fish escaped
+    CATCH: [50, 30, 50, 30, 50],  // Successful catch (celebration)
+    TAP: [10]                      // Light tap feedback
+  };
+
   const BACKGROUND_FISH = {
     count: 10,
     minSpeed: 24,
@@ -1029,6 +1045,7 @@ function startGame() {
         state.pendingCatch.length
       )})`
     );
+    hapticFeedback(HAPTIC.CATCH); // Celebration vibration for successful catch
     showCatchOverlay(state.pendingCatch);
     updateUI();
   }
@@ -1342,10 +1359,23 @@ function startGame() {
     ctx.fill();
   }
 
+  function showTapRipple(x, y) {
+    // Create ripple element
+    const ripple = document.createElement("div");
+    ripple.className = "tap-ripple";
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    canvas.parentElement.appendChild(ripple);
+
+    // Remove after animation
+    setTimeout(() => ripple.remove(), 600);
+  }
+
   function showQTEOverlay() {
     qteOverlay.classList.remove("hidden");
     qteTimerBar.style.width = "100%";
     setStatus("Quick! Reel it in!");
+    hapticFeedback(HAPTIC.BITE); // Vibrate when fish bites
   }
 
   function hideQTEOverlay() {
@@ -1404,6 +1434,7 @@ function startGame() {
       state.linePhase = "reeling";
       state.reelTimer = 0;
       setStatus("Perfect! Reeling in...");
+      hapticFeedback(HAPTIC.SUCCESS); // Vibrate on successful meter hit
       updateUI();
     } else {
       // Missed the zone
@@ -1415,6 +1446,7 @@ function startGame() {
     hideQTEOverlay();
     hideMeterOverlay();
     setStatus(message);
+    hapticFeedback(HAPTIC.FAIL); // Vibrate when fish escapes
     resetLine();
   }
 
@@ -1446,6 +1478,47 @@ function startGame() {
     meterOverlay.addEventListener("click", () => {
       if (state.linePhase === "minigame" && state.meterActive) {
         checkMeterTiming();
+      }
+    });
+
+    // Meter mini-game touch handler
+    meterOverlay.addEventListener("touchend", (event) => {
+      event.preventDefault();
+      if (state.linePhase === "minigame" && state.meterActive) {
+        checkMeterTiming();
+      }
+    });
+
+    // Canvas touch handlers for tap-to-cast
+    canvas.addEventListener("touchstart", (event) => {
+      event.preventDefault(); // Prevent scrolling
+      const touch = event.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+
+      // Only allow tap-to-cast in idle state
+      if (state.linePhase === "idle") {
+        // Visual feedback: ripple effect at touch point
+        showTapRipple(x, y);
+        hapticFeedback(HAPTIC.TAP); // Light tap feedback
+      }
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", (event) => {
+      event.preventDefault();
+
+      // Trigger cast if in idle state
+      if (state.linePhase === "idle") {
+        castLine();
+      }
+    }, { passive: false });
+
+    // Touch-to-close for catch overlay
+    catchOverlay.addEventListener("touchend", (event) => {
+      if (event.target === catchOverlay) {
+        event.preventDefault();
+        hideCatchOverlay();
       }
     });
 

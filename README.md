@@ -34,19 +34,31 @@ A browser-based fishing game built with vanilla HTML5 Canvas, CSS, and JavaScrip
 - Beautiful animated water and sky gradient backgrounds
 - Smooth stick figure fisher animation with casting/reeling motions
 - Dynamic bobber physics (gentle idle bob → frantic hooked bounce)
+- Tap ripple animation for touch feedback on canvas
 - Responsive UI with accessibility support
+- Haptic feedback (vibration) for mobile devices during key game moments
 
 ## Controls
 
-### Keyboard
+### Keyboard (Desktop)
 - **Space**: Cast line / Reel in during QTE / Click meter during mini-game
 - **U**: Upgrade bait
 - **Escape**: Close panels/overlays
 
-### Mouse
+### Mouse (Desktop)
 - Click buttons for all actions
 - Click on fish in collection to view details
 - Click anywhere on meter overlay during mini-game to attempt catch
+
+### Touch (Mobile/Tablet) 🎮
+- **Tap water/canvas**: Cast your fishing line (when idle)
+- **Tap "Reel In" button**: Respond to fish bite during QTE
+- **Tap meter overlay**: Attempt catch during timing game
+- **Tap fish in collection**: View details and sell options
+- **Tap close buttons**: Dismiss panels and overlays
+- **Haptic feedback**: Feel vibrations for bites, successes, and failures
+- All button controls work via tap
+- Smooth momentum scrolling in collection panel (iOS)
 
 ## How to Play
 
@@ -119,6 +131,9 @@ fishing-game/
 - Modern browsers with ES6 support
 - HTML5 Canvas required
 - Tested on Chrome, Firefox, Safari, Edge
+- **Mobile**: Optimized for iOS Safari, Chrome on Android
+- **Tablets**: Full support for iPad and Android tablets
+- Touch events and haptic feedback (Vibration API) supported on compatible devices
 
 ## Configuration
 
@@ -138,6 +153,7 @@ Key game balance values in `game.js` CONFIG object:
 
 ## Future Enhancements
 
+- [x] Mobile touch controls optimization ✅ *Completed 2025-11-01*
 - [ ] Sound effects and background music
 - [ ] Multiple fishing locations with different fish pools
 - [ ] Weather effects affecting catch rates
@@ -145,7 +161,8 @@ Key game balance values in `game.js` CONFIG object:
 - [ ] Daily challenges
 - [ ] Rod upgrades in addition to bait
 - [ ] Multiplayer leaderboards
-- [ ] Mobile touch controls optimization
+- [ ] PWA manifest for "Add to Home Screen"
+- [ ] Swipe gestures for navigation
 
 ## Credits
 

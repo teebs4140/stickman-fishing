@@ -3,6 +3,12 @@
   font-family: "Segoe UI", Helvetica, Arial, sans-serif;
   background-color: #0d1b2a;
   color: #e5eeff;
+
+  /* Safe area insets for notched devices */
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-right: env(safe-area-inset-right);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
 }
 
 body {
@@ -21,7 +27,10 @@ body {
   display: grid;
   grid-template-rows: auto 1fr auto;
   gap: clamp(0.75rem, 1.5vw, 1.5rem);
-  padding: clamp(0.75rem, 1.5vw, 1.8rem);
+  padding: max(clamp(0.75rem, 1.5vw, 1.8rem), var(--safe-area-inset-top))
+            max(clamp(0.75rem, 1.5vw, 1.8rem), var(--safe-area-inset-right))
+            max(clamp(0.75rem, 1.5vw, 1.8rem), var(--safe-area-inset-bottom))
+            max(clamp(0.75rem, 1.5vw, 1.8rem), var(--safe-area-inset-left));
   box-sizing: border-box;
   position: relative;
 }
@@ -63,6 +72,7 @@ body {
   overflow: hidden;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
   min-height: 0;
+  touch-action: none; /* Prevent default touch behaviors on canvas */
 }
 
 #game-canvas {
@@ -82,6 +92,7 @@ body {
 .controls button {
   flex: 1 1 220px;
   padding: 0.9rem 1.1rem;
+  min-height: 44px; /* Ensure minimum touch target size */
   border: none;
   border-radius: 0.9rem;
   font-size: 1.05rem;
@@ -90,6 +101,8 @@ body {
   color: #f1f5f9;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .controls button:disabled {
@@ -102,6 +115,11 @@ body {
 .controls button:not(:disabled):hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 24px rgba(37, 99, 235, 0.55);
+}
+
+.controls button:not(:disabled):active {
+  transform: scale(0.97);
+  opacity: 0.9;
 }
 
 .panel {
@@ -179,12 +197,15 @@ body {
 }
 
 .customize-item button {
-  padding: 0.45rem 0.85rem;
+  padding: 0.65rem 1rem;
+  min-height: 44px; /* Ensure touch target size */
   border: none;
   border-radius: 999px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .customize-item button.buy {
@@ -234,6 +255,13 @@ body {
   font-size: 1.5rem;
   line-height: 1;
   cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #collection-list {
@@ -241,6 +269,7 @@ body {
   margin: 0;
   padding: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth iOS scrolling */
 }
 
 #collection-list li {
@@ -257,12 +286,19 @@ body {
 #collection-list li.collection-item {
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #collection-list li.collection-item:hover {
   transform: translateY(-2px);
   background: rgba(148, 197, 255, 0.18);
   box-shadow: 0 8px 20px rgba(15, 118, 110, 0.15);
+}
+
+#collection-list li.collection-item:active {
+  transform: scale(0.98);
+  background: rgba(148, 197, 255, 0.25);
 }
 
 #collection-list li.collection-item:focus-visible {
@@ -344,7 +380,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: max(1rem, var(--safe-area-inset-top))
+            max(1rem, var(--safe-area-inset-right))
+            max(1rem, var(--safe-area-inset-bottom))
+            max(1rem, var(--safe-area-inset-left));
   z-index: 30;
 }
 
@@ -407,6 +446,7 @@ body {
 .close-catch-btn {
   align-self: flex-start;
   padding: 0.55rem 1.25rem;
+  min-height: 44px;
   border: none;
   border-radius: 999px;
   font-weight: 600;
@@ -414,6 +454,13 @@ body {
   color: #e5eeff;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.close-catch-btn:active {
+  transform: scale(0.95);
+  opacity: 0.9;
 }
 
 .close-catch-btn:hover {
@@ -423,6 +470,7 @@ body {
 
 .sell-catch-btn {
   padding: 0.55rem 1.25rem;
+  min-height: 44px;
   border: none;
   border-radius: 999px;
   font-weight: 600;
@@ -430,6 +478,13 @@ body {
   color: #e5fdf4;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sell-catch-btn:not(:disabled):active {
+  transform: scale(0.95);
+  opacity: 0.9;
 }
 
 .sell-catch-btn:hover {
@@ -463,7 +518,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: max(1rem, var(--safe-area-inset-top))
+            max(1rem, var(--safe-area-inset-right))
+            max(1rem, var(--safe-area-inset-bottom))
+            max(1rem, var(--safe-area-inset-left));
   z-index: 40;
   animation: fadeIn 0.2s ease;
 }
@@ -522,9 +580,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: max(1rem, var(--safe-area-inset-top))
+            max(1rem, var(--safe-area-inset-right))
+            max(1rem, var(--safe-area-inset-bottom))
+            max(1rem, var(--safe-area-inset-left));
   z-index: 40;
   animation: fadeIn 0.3s ease;
+  cursor: pointer;
+  user-select: none;
 }
 
 .meter-container {
@@ -533,7 +596,7 @@ body {
   padding: 2.5rem 3rem;
   box-shadow: 0 20px 60px rgba(37, 99, 235, 0.5);
   text-align: center;
-  min-width: 400px;
+  width: clamp(280px, 90vw, 600px);
   max-width: 500px;
 }
 
@@ -643,11 +706,52 @@ body {
   }
 
   .meter-container {
-    min-width: auto;
-    padding: 1.5rem 2rem;
+    width: clamp(260px, 95vw, 500px);
+    padding: 1.5rem 1.5rem;
   }
 
   .meter-title {
     font-size: 1.5rem;
+  }
+}
+
+/* Touch-specific styles */
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .controls button:not(:disabled):hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  #collection-list li.collection-item:hover {
+    transform: none;
+    background: rgba(148, 163, 184, 0.15);
+    box-shadow: none;
+  }
+
+  .close-catch-btn:hover,
+  .sell-catch-btn:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+/* Tap ripple animation */
+.tap-ripple {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: translate(-50%, -50%);
+  animation: ripple 0.6s ease-out;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes ripple {
+  to {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
   }
 }

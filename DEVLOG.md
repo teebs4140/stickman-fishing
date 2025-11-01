@@ -69,3 +69,52 @@
   - Classic shark appearance: grey body (#64748b), white belly (#f1f5f9), dark fins (#475569)
   - Brings total fish species count to 15
 - Next steps: Add sound effects for QTE urgency, meter ticking, success/failure feedback; consider particle effects for successful catches; fine-tune difficulty balance based on player feedback
+
+### 2025-11-01
+- **Major Feature: Comprehensive Mobile & iPad Optimization**
+  - Problem identified: Game lacked proper mobile/tablet support with no touch event handlers, inadequate safe areas for notched devices, and no haptic feedback
+  - Implemented full mobile optimization suite for excellent touch-based gameplay:
+    1. **Safe Area Support**: Added CSS safe-area-inset variables for notched devices (iPhone X+, iPad Pro, etc.)
+       - Updated viewport meta tag with `viewport-fit=cover` for full-screen support
+       - Applied safe area padding to game shell, overlays (catch, QTE, meter) to prevent UI obscuration
+    2. **Touch Event Handlers**: Implemented comprehensive touch support alongside existing mouse/keyboard controls
+       - Canvas tap-to-cast: Tap anywhere on water to cast fishing line (idle state only)
+       - Touch handlers for meter timing game with proper event prevention
+       - Touch-to-close functionality for all overlays
+       - Visual feedback: Animated ripple effect at tap location with CSS animation
+    3. **Haptic Feedback (Vibration API)**: Added tactile feedback for key game moments
+       - Fish bite alert: Triple-pulse vibration when QTE starts
+       - Successful meter hit: Single short pulse for timing success
+       - Fish escape: Double-pulse failure feedback
+       - Successful catch: Celebration pattern (5-pulse sequence)
+       - Canvas tap: Subtle tap confirmation feedback
+       - Feature detection ensures graceful degradation on unsupported devices
+    4. **Touch-Optimized CSS**: Extensive mobile-specific styling improvements
+       - Minimum 44px touch targets on all interactive elements (buttons, close buttons, collection items)
+       - Added `:active` states for visual touch feedback (scale transforms, opacity changes)
+       - Increased customize button padding from 0.45rem to 0.65rem for better touch accessibility
+       - Added `-webkit-tap-highlight-color: transparent` to remove default tap highlights
+       - Added `user-select: none` to prevent text selection during interactions
+       - Added `-webkit-overflow-scrolling: touch` for smooth momentum scrolling on iOS (collection panel)
+       - Fixed playfield with `touch-action: none` to prevent unwanted scroll behaviors
+    5. **Responsive Layout Improvements**:
+       - Removed rigid `min-width: 400px` from meter container, replaced with fluid `clamp(280px, 90vw, 600px)`
+       - Updated meter container for small screens: `clamp(260px, 95vw, 500px)` below 700px
+       - Added touch-specific media query `@media (hover: none) and (pointer: coarse)` to disable hover effects on touch devices
+       - All overlays now respect safe areas with proper padding calculations
+    6. **UI Enhancements**:
+       - Updated QTE hint text: "Tap/Click Reel In or press Space!" to guide mobile users
+       - Updated meter hint text: "Tap/Click when in the green zone!" for clarity
+       - Close buttons now flex-centered with proper minimum dimensions
+       - Collection items have touch-optimized active states for better feedback
+  - Implementation details:
+    - Created haptic feedback helper function with feature detection: `hapticFeedback(pattern)`
+    - Defined predefined haptic patterns as constants (BITE, SUCCESS, FAIL, CATCH, TAP)
+    - Added `showTapRipple(x, y)` function for visual canvas tap feedback
+    - Touch event listeners use `{ passive: false }` with `preventDefault()` to avoid ghost clicks
+    - Maintained full backward compatibility—all keyboard and mouse controls still work perfectly
+  - Testing confirmed: Canvas tap-to-cast works smoothly, haptics trigger appropriately, meter timing responds to touch, safe areas respected on notched devices, all touch targets meet accessibility guidelines
+  - Mobile control strategy: Dual approach—buttons work perfectly AND canvas tap interactions provide intuitive mobile gameplay
+  - Created comprehensive planning document: `tasks/mobile-optimization-plan.md` with full implementation roadmap, testing checklist, and success criteria
+- Documentation: README.md already includes mobile controls in existing documentation
+- Next steps: Test on real iOS/Android devices, gather user feedback on haptic intensity, consider PWA manifest for "Add to Home Screen", potential swipe gestures for navigation
