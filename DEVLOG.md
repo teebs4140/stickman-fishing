@@ -118,3 +118,13 @@
   - Created comprehensive planning document: `tasks/mobile-optimization-plan.md` with full implementation roadmap, testing checklist, and success criteria
 - Documentation: README.md already includes mobile controls in existing documentation
 - Next steps: Test on real iOS/Android devices, gather user feedback on haptic intensity, consider PWA manifest for "Add to Home Screen", potential swipe gestures for navigation
+- **Bug Fix: QTE Overlay Mobile Interaction**
+  - Problem discovered during iPhone 16 Pro testing: QTE "REEL NOW!" overlay blocked the "Reel In" button, making it impossible to respond to fish bites on mobile
+  - Solution: Made the QTE overlay itself tappable—users can now tap anywhere on the alert to reel in
+  - Changes:
+    - Added click and touchend event listeners to QTE overlay in game.js
+    - Updated hint text from "Tap/Click Reel In or press Space!" to "Tap anywhere to reel!" for clarity
+    - Added `cursor: pointer` and `user-select: none` to `.qte-overlay` CSS
+    - Added haptic feedback on overlay tap for tactile confirmation
+  - This makes the mobile UX more intuitive—tap the big alert itself rather than hunting for a button behind it
+  - Matches the existing pattern used for the meter overlay (tap anywhere to attempt catch)

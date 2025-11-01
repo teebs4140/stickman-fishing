@@ -524,6 +524,8 @@ body {
             max(1rem, var(--safe-area-inset-left));
   z-index: 40;
   animation: fadeIn 0.2s ease;
+  cursor: pointer;
+  user-select: none;
 }
 
 .qte-content {

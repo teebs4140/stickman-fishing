@@ -1489,6 +1489,22 @@ function startGame() {
       }
     });
 
+    // QTE overlay click handler - tap anywhere on the alert to reel
+    qteOverlay.addEventListener("click", () => {
+      if (state.linePhase === "hooked" && state.qteActive) {
+        reelLine();
+      }
+    });
+
+    // QTE overlay touch handler
+    qteOverlay.addEventListener("touchend", (event) => {
+      event.preventDefault();
+      if (state.linePhase === "hooked" && state.qteActive) {
+        hapticFeedback(HAPTIC.TAP); // Light tap feedback
+        reelLine();
+      }
+    });
+
     // Canvas touch handlers for tap-to-cast
     canvas.addEventListener("touchstart", (event) => {
       event.preventDefault(); // Prevent scrolling
