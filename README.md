@@ -2,6 +2,8 @@
 
 A browser-based fishing game built with vanilla HTML5 Canvas, CSS, and JavaScript. Cast your line, catch fish, and upgrade your bait to catch rarer species!
 
+🎮 **[Play Now!](https://teebs4140.github.io/stickman-fishing/)**
+
 ## Features
 
 ### Core Gameplay
