@@ -1,0 +1,53 @@
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# IDE / Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Node.js (if added later)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Build / Distribution
+dist/
+build/
+*.min.js
+*.min.css
+
+# Testing / Browser Automation
+.playwright-mcp/
+screenshots/
+playwright-report/
+test-results/
+
+# Logs
+*.log
+logs/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
