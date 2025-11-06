@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Stickman Fishing Prototype</title>
+  <title>Character Fishing Game</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -31,7 +31,7 @@
       <button id="reel-btn" disabled>Reel In</button>
       <button id="upgrade-btn">Upgrade Bait</button>
       <button id="toggle-collection-btn">View Collection</button>
-      <button id="customize-btn">Customize</button>
+      <button id="customize-btn">Characters</button>
     </nav>
 
     <aside id="collection-panel" class="panel hidden" aria-live="polite">
@@ -47,15 +47,14 @@
 
   <aside id="customize-panel" class="panel hidden" aria-live="polite">
     <header>
-      <h2>Customize Stickman</h2>
-      <button id="close-customize-btn" aria-label="Close customize panel">X</button>
+      <h2>Select Character</h2>
+      <button id="close-customize-btn" aria-label="Close character selection panel">X</button>
     </header>
     <section class="customize-section">
-      <h3>Hats</h3>
+      <h3>Characters</h3>
       <ul id="hat-list" class="customize-list"></ul>
     </section>
     <section class="customize-section">
-      <h3>Outfits</h3>
       <ul id="outfit-list" class="customize-list"></ul>
     </section>
   </aside>

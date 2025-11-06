@@ -110,75 +110,42 @@ function startGame() {
     { level: 6, name: "Cosmic Resonator", upgradeCost: 620, odds: { Common: 0.12, Uncommon: 0.28, Rare: 0.24, Epic: 0.14, Legendary: 0.12, Mythic: 0.1 } },
   ];
 
-  const COSMETICS = {
-    hats: [
-      {
-        id: "default",
-        name: "Classic Blue Cap",
-        cost: 0,
-        colors: { top: "#1d4ed8", brim: "#1d4ed8" },
-        description: "Simple cap that keeps the sun out of your eyes.",
-      },
-      {
-        id: "sunset",
-        name: "Sunset Beanie",
-        cost: 180,
-        colors: { top: "#f97316", brim: "#fb7185" },
-        description: "Warm hues inspired by evening fishing trips.",
-      },
-      {
-        id: "forest",
-        name: "Forest Bucket",
-        cost: 260,
-        colors: { top: "#166534", brim: "#22c55e" },
-        description: "Blends in with the pines when you scout new spots.",
-      },
-      {
-        id: "cosmic",
-        name: "Cosmic Halo",
-        cost: 360,
-        colors: { top: "#9333ea", brim: "#f472b6" },
-        description: "Shimmering band that glows with cosmic energy.",
-      },
-    ],
-    outfits: [
-      {
-        id: "default",
-        name: "Standard Lines",
-        cost: 0,
-        stroke: "#0f172a",
-        accent: "#2563eb",
-        accentType: "none",
-        description: "Reliable black lines—ready for any catch.",
-      },
-      {
-        id: "angler",
-        name: "Angler Jacket",
-        cost: 220,
-        stroke: "#1f2937",
-        accent: "#16a34a",
-        accentType: "vest",
-        description: "Utility vest packed with imaginary tackle.",
-      },
-      {
-        id: "crimson",
-        name: "Crimson Sash",
-        cost: 280,
-        stroke: "#7f1d1d",
-        accent: "#f97316",
-        accentType: "sash",
-        description: "Bold sash that shows you mean fishing business.",
-      },
-      {
-        id: "midnight",
-        name: "Midnight Slicker",
-        cost: 340,
-        stroke: "#0f172a",
-        accent: "#3b82f6",
-        accentType: "coat",
-        description: "Storm-ready coat for late-night legendary hunts.",
-      },
-    ],
+  // Character images - loaded asynchronously
+  const characterImages = {
+    char1: new Image(),
+    char2: new Image(),
+    char3: new Image(),
+  };
+  characterImages.char1.src = "characters/image-removebg-preview.png";
+  characterImages.char2.src = "characters/image_2-removebg-preview.png";
+  characterImages.char3.src = "characters/image_5-removebg-preview.png";
+
+  const CHARACTERS = {
+    char1: {
+      id: "char1",
+      name: "Fisher Blue",
+      cost: 0,
+      description: "A dedicated angler ready for any catch.",
+      // Rod tip offsets calibrated from visual testing
+      rodTipOffsetX: 0.98,  // Relative to character width - far right at rod tip
+      rodTipOffsetY: 0.22,  // Relative to character height - at the rod tip end
+    },
+    char2: {
+      id: "char2",
+      name: "Bunny Fisher",
+      cost: 0, // Free for testing
+      description: "Cheerful bunny with a lucky carrot charm.",
+      rodTipOffsetX: 0.93,  // Rod extends to the right - at rod tip
+      rodTipOffsetY: 0.22,  // Rod tip position
+    },
+    char3: {
+      id: "char3",
+      name: "Fisher Green",
+      cost: 0, // Free for testing
+      description: "Confident fisher with expert technique.",
+      rodTipOffsetX: 0.80,  // Rod tip - more to the left for Fisher Green
+      rodTipOffsetY: 0.22,  // Rod tip position - slightly down
+    },
   };
 
   const FISH_ART = {
@@ -237,23 +204,19 @@ function startGame() {
     pendingCatch: null,
     collection: new Map(),
     backgroundFish: [],
-    customization: {
-      owned: {
-        hats: new Set(["default"]),
-        outfits: new Set(["default"]),
-      },
-      equippedHat: "default",
-      equippedOutfit: "default",
+    characters: {
+      owned: new Set(["char1"]), // char1 is free/default
+      selected: "char1",
     },
   };
 
-  const stickman = {
+  const character = {
     x: canvas.width * 0.22,
     baseY: CONFIG.waterline,
-    height: 140,
-    headRadius: 18,
-    handX: 0,
-    handY: 0,
+    width: 120,  // Character image width when rendered
+    height: 140, // Character image height when rendered
+    rodTipX: 0,
+    rodTipY: 0,
   };
 
   let lastTimestamp = performance.now();
@@ -431,54 +394,57 @@ function startGame() {
     );
   }
 
-  function getCosmetics(type) {
-    return COSMETICS[type] ?? [];
+  function getCharacterById(id) {
+    return CHARACTERS[id];
   }
 
-  function getCosmeticById(type, id) {
-    return getCosmetics(type).find((item) => item.id === id);
+  function isCharacterOwned(id) {
+    return state.characters.owned.has(id);
   }
 
-  function isCosmeticOwned(type, id) {
-    return state.customization.owned[type]?.has(id);
-  }
-
-  function purchaseCosmetic(type, id) {
-    const item = getCosmeticById(type, id);
-    if (!item) return;
-    if (isCosmeticOwned(type, id)) {
-      setStatus(`${item.name} is already in your wardrobe.`);
+  function purchaseCharacter(id) {
+    const char = getCharacterById(id);
+    if (!char) return;
+    if (isCharacterOwned(id)) {
+      setStatus(`${char.name} is already unlocked.`);
       return;
     }
-    if (state.coins < item.cost) {
-      const shortfall = item.cost - state.coins;
-      setStatus(`Need ${shortfall} more coins to buy ${item.name}.`);
+    if (state.coins < char.cost) {
+      const shortfall = char.cost - state.coins;
+      setStatus(`Need ${shortfall} more coins to unlock ${char.name}.`);
       return;
     }
-    state.coins -= item.cost;
-    state.customization.owned[type].add(id);
-    setStatus(`Purchased ${item.name}!`);
+    state.coins -= char.cost;
+    state.characters.owned.add(id);
+    setStatus(`Unlocked ${char.name}!`);
     updateUI();
-    renderCustomizationUI();
+    renderCharacterSelectionUI();
   }
 
-  function equipCosmetic(type, id) {
-    const item = getCosmeticById(type, id);
-    if (!item) return;
-    if (!isCosmeticOwned(type, id)) {
-      setStatus(`Buy ${item.name} before equipping it.`);
+  function selectCharacter(id) {
+    const char = getCharacterById(id);
+    if (!char) return;
+    if (!isCharacterOwned(id)) {
+      setStatus(`Unlock ${char.name} before selecting it.`);
       return;
     }
-    const key = type === "hats" ? "equippedHat" : "equippedOutfit";
-    state.customization[key] = id;
-    setStatus(`${item.name} equipped! Looking sharp.`);
-    renderCustomizationUI();
+    state.characters.selected = id;
+    setStatus(`${char.name} selected!`);
+    renderCharacterSelectionUI();
   }
 
-  function renderCustomizationList(listElement, items, type) {
-    if (!listElement) return;
-    listElement.innerHTML = "";
-    for (const item of items) {
+  function renderCharacterSelectionUI() {
+    if (!hatList) return; // Repurposing the hatList element for characters
+
+    hatList.innerHTML = "";
+
+    // Hide the outfit list since we're only using character selection now
+    if (outfitList) {
+      outfitList.style.display = "none";
+    }
+
+    const characters = Object.values(CHARACTERS);
+    for (const char of characters) {
       const li = document.createElement("li");
       li.className = "customize-item";
 
@@ -486,16 +452,16 @@ function startGame() {
       info.className = "customize-item-info";
 
       const name = document.createElement("span");
-      name.textContent = item.name;
+      name.textContent = char.name;
       info.appendChild(name);
 
       const desc = document.createElement("span");
       desc.style.opacity = "0.8";
       desc.style.fontSize = "0.82rem";
-      desc.textContent = item.description;
+      desc.textContent = char.description;
       info.appendChild(desc);
 
-      if (isCosmeticOwned(type, item.id) && item.cost > 0) {
+      if (isCharacterOwned(char.id) && char.cost > 0) {
         const owned = document.createElement("span");
         owned.className = "owned-tag";
         owned.textContent = "Owned";
@@ -507,32 +473,25 @@ function startGame() {
       const actions = document.createElement("div");
       actions.className = "customize-item-actions";
 
-      if (!isCosmeticOwned(type, item.id)) {
+      if (!isCharacterOwned(char.id)) {
         const buyBtn = document.createElement("button");
         buyBtn.className = "buy";
-        buyBtn.textContent = `Buy (${item.cost} coins)`;
-        buyBtn.disabled = state.coins < item.cost;
-        buyBtn.addEventListener("click", () => purchaseCosmetic(type, item.id));
+        buyBtn.textContent = `Unlock (${char.cost} coins)`;
+        buyBtn.disabled = state.coins < char.cost;
+        buyBtn.addEventListener("click", () => purchaseCharacter(char.id));
         actions.appendChild(buyBtn);
       }
 
-      const equipBtn = document.createElement("button");
-      equipBtn.className = "equip";
-      const currentEquipped =
-        type === "hats" ? state.customization.equippedHat : state.customization.equippedOutfit;
-      equipBtn.textContent = currentEquipped === item.id ? "Equipped" : "Equip";
-      equipBtn.disabled = currentEquipped === item.id || !isCosmeticOwned(type, item.id);
-      equipBtn.addEventListener("click", () => equipCosmetic(type, item.id));
-      actions.appendChild(equipBtn);
+      const selectBtn = document.createElement("button");
+      selectBtn.className = "equip";
+      selectBtn.textContent = state.characters.selected === char.id ? "Selected" : "Select";
+      selectBtn.disabled = state.characters.selected === char.id || !isCharacterOwned(char.id);
+      selectBtn.addEventListener("click", () => selectCharacter(char.id));
+      actions.appendChild(selectBtn);
 
       li.appendChild(actions);
-      listElement.appendChild(li);
+      hatList.appendChild(li);
     }
-  }
-
-  function renderCustomizationUI() {
-    renderCustomizationList(hatList, getCosmetics("hats"), "hats");
-    renderCustomizationList(outfitList, getCosmetics("outfits"), "outfits");
   }
 
   function toggleCustomizePanel(forceOpen) {
@@ -543,7 +502,7 @@ function startGame() {
     if (shouldOpen) {
       hideCatchOverlay();
       collectionPanel.classList.add("hidden");
-      renderCustomizationUI();
+      renderCharacterSelectionUI();
       customizePanel.classList.remove("hidden");
     } else {
       customizePanel.classList.add("hidden");
@@ -829,12 +788,10 @@ function startGame() {
     layout.deckThickness = layout.dockHeight * 0.24;
     layout.deckY = layout.dockTop + layout.deckThickness;
 
-    stickman.height = Math.max(150, canvas.height * 0.24);
-    stickman.headRadius = stickman.height * 0.16;
-    stickman.x = layout.dockX + layout.dockWidth * 0.55;
-    stickman.baseY = layout.dockTop + layout.deckThickness * 0.2;
-    stickman.handX = stickman.x + stickman.height * 0.34;
-    stickman.handY = stickman.baseY - stickman.height * 0.46;
+    character.height = Math.max(150, canvas.height * 0.24);
+    character.width = character.height * 0.86; // Maintain aspect ratio
+    character.x = layout.dockX + layout.dockWidth * 0.55;
+    character.baseY = layout.deckY; // Stand on top of the deck plank
 
     state.bobber.baseX = canvas.width * 0.72;
     state.bobber.baseY = CONFIG.waterline + 60;
@@ -870,7 +827,7 @@ function startGame() {
     }
 
     if (!customizePanel.classList.contains("hidden")) {
-      renderCustomizationUI();
+      renderCharacterSelectionUI();
     }
   }
 
@@ -937,7 +894,7 @@ function startGame() {
       case "casting": {
         state.castTimer += dt;
         const t = clamp(state.castTimer / CONFIG.castDurationMs, 0, 1);
-        const start = { x: stickman.handX, y: stickman.handY };
+        const start = { x: character.rodTipX, y: character.rodTipY };
         state.bobber.x = start.x + (state.bobber.baseX - start.x) * t;
         state.bobber.y = start.y + (state.bobber.baseY - start.y) * t;
 
@@ -1162,7 +1119,7 @@ function startGame() {
     drawBackground();
     drawBackgroundFish();
     drawDock();
-    drawStickman();
+    drawCharacter();
     drawFishingLine();
     drawBobber();
   }
@@ -1218,115 +1175,28 @@ function startGame() {
     }
   }
 
-  function drawStickman() {
-    const headRadius = stickman.headRadius;
-    const currentHat =
-      getCosmeticById("hats", state.customization.equippedHat) ||
-      getCosmeticById("hats", "default");
-    const currentOutfit =
-      getCosmeticById("outfits", state.customization.equippedOutfit) ||
-      getCosmeticById("outfits", "default");
-    const strokeColor = currentOutfit?.stroke ?? "#0f172a";
-    const accentColor = currentOutfit?.accent ?? "#2563eb";
-    const accentType = currentOutfit?.accentType ?? "none";
-    const hatTopColor = currentHat?.colors?.top ?? "#1d4ed8";
-    const hatBrimColor = currentHat?.colors?.brim ?? hatTopColor;
-    const headCenterY = stickman.baseY - stickman.height + headRadius;
-    const shoulderY = headCenterY + headRadius * 1.2;
-    const hipY = stickman.baseY - stickman.height * 0.28;
-    const limbThickness = Math.max(5, stickman.height * 0.05);
+  function drawCharacter() {
+    const selectedCharId = state.characters.selected;
+    const charData = CHARACTERS[selectedCharId];
+    const charImage = characterImages[selectedCharId];
 
-    ctx.save();
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-
-    ctx.lineWidth = limbThickness;
-    ctx.strokeStyle = strokeColor;
-    ctx.beginPath();
-    ctx.moveTo(stickman.x, shoulderY);
-    ctx.lineTo(stickman.x, hipY);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(stickman.x, hipY);
-    ctx.lineTo(stickman.x - stickman.height * 0.18, stickman.baseY);
-    ctx.moveTo(stickman.x, hipY);
-    ctx.lineTo(stickman.x + stickman.height * 0.16, stickman.baseY);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(stickman.x, shoulderY + limbThickness * 0.15);
-    ctx.lineTo(stickman.handX, stickman.handY);
-    ctx.stroke();
-
-    if (accentType && accentType !== "none") {
-      ctx.save();
-      ctx.fillStyle = accentColor;
-      ctx.strokeStyle = accentColor;
-      switch (accentType) {
-        case "vest": {
-          const vestTop = shoulderY - headRadius * 0.2;
-          const vestBottom = hipY + limbThickness * 0.5;
-          const vestWidth = stickman.height * 0.28;
-          ctx.globalAlpha = 0.55;
-          ctx.fillRect(stickman.x - vestWidth / 2, vestTop, vestWidth, vestBottom - vestTop);
-          ctx.globalAlpha = 1;
-          break;
-        }
-        case "sash": {
-          ctx.lineWidth = limbThickness * 1.6;
-          ctx.globalAlpha = 0.7;
-          ctx.beginPath();
-          ctx.moveTo(stickman.x - stickman.height * 0.24, shoulderY);
-          ctx.lineTo(stickman.x + stickman.height * 0.18, hipY);
-          ctx.stroke();
-          ctx.globalAlpha = 1;
-          break;
-        }
-        case "coat": {
-          const coatTop = shoulderY - limbThickness * 0.5;
-          const coatBottom = hipY + stickman.height * 0.18;
-          const coatWidth = stickman.height * 0.32;
-          ctx.globalAlpha = 0.6;
-          ctx.fillRect(stickman.x - coatWidth / 2, coatTop, coatWidth, coatBottom - coatTop);
-          ctx.globalAlpha = 1;
-          break;
-        }
-        default:
-          break;
-      }
-      ctx.restore();
+    // Only draw if image is loaded
+    if (!charImage || !charImage.complete) {
+      return;
     }
 
-    ctx.fillStyle = "#fde68a";
-    ctx.beginPath();
-    ctx.arc(stickman.x, headCenterY, headRadius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+    ctx.save();
 
-    const hatWidth = headRadius * 2.4;
-    const hatHeight = headRadius * 0.8;
-    ctx.fillStyle = hatTopColor;
-    ctx.fillRect(stickman.x - hatWidth / 2, headCenterY - headRadius * 1.35, hatWidth, hatHeight);
-    ctx.fillStyle = hatBrimColor;
-    ctx.fillRect(
-      stickman.x - hatWidth / 1.6,
-      headCenterY - headRadius * 0.9,
-      hatWidth * 1.25,
-      hatHeight * 0.55
-    );
+    // Calculate character position - centered at character.x, bottom at character.baseY
+    const drawX = character.x - character.width / 2;
+    const drawY = character.baseY - character.height;
 
-    ctx.strokeStyle = "#4b5563";
-    ctx.lineWidth = limbThickness * 0.55;
-    ctx.beginPath();
-    const rodTipX = stickman.handX + stickman.height * 0.62;
-    const rodTipY = stickman.handY - stickman.height * 0.36;
-    ctx.moveTo(stickman.handX, stickman.handY);
-    ctx.lineTo(rodTipX, rodTipY);
-    ctx.stroke();
+    // Draw the character image
+    ctx.drawImage(charImage, drawX, drawY, character.width, character.height);
 
-    stickman.rodTipX = rodTipX;
-    stickman.rodTipY = rodTipY;
+    // Calculate rod tip position based on character data
+    character.rodTipX = drawX + character.width * charData.rodTipOffsetX;
+    character.rodTipY = drawY + character.height * charData.rodTipOffsetY;
 
     ctx.restore();
   }
@@ -1335,12 +1205,12 @@ function startGame() {
     ctx.strokeStyle = "#dce6f2";
     ctx.lineWidth = 2.2;
     ctx.beginPath();
-    const tipX = stickman.rodTipX ?? stickman.handX;
-    const tipY = stickman.rodTipY ?? stickman.handY;
+    const tipX = character.rodTipX;
+    const tipY = character.rodTipY;
     ctx.moveTo(tipX, tipY);
     ctx.quadraticCurveTo(
       (tipX + state.bobber.x) / 2,
-      tipY - stickman.height * 0.5,
+      tipY - character.height * 0.5,
       state.bobber.x,
       state.bobber.y - 10
     );
@@ -1597,7 +1467,7 @@ function startGame() {
     wireControls();
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
-    renderCustomizationUI();
+    renderCharacterSelectionUI();
     updateUI();
     requestAnimationFrame(update);
   }
