@@ -120,6 +120,35 @@ function startGame() {
   characterImages.char2.src = "characters/image_2-removebg-preview.png";
   characterImages.char3.src = "characters/image_5-removebg-preview.png";
 
+  // Fish images - loaded asynchronously
+  const fishImageFiles = {
+    minnow: "lively-minnow.png",
+    sunny: "sunny-sunfish.png",
+    perch: "yellow-perch.png",
+    bass: "river-bass.png",
+    catfish: "mudcat.png",
+    pike: "needle-pike.png",
+    koi: "glowing-koi.png",
+    salmon: "silver-salmon.png",
+    eel: "storm-eel.png",
+    angler: "glimmer-angler.png",
+    swordfish: "azure-swordfish.png",
+    dragonfin: "dragonfin-carp.png",
+    leviathan: "echoing-leviathan.png",
+    starlit: "starlit-ray.png",
+    shark: "phantom-shark.png",
+    rainbow: "rainbow-fish.png",
+    diamond: "diamond-fish.png",
+    darkmatter: "dark-matter-fish.png",
+  };
+
+  const fishImages = {};
+  // Load all fish images
+  Object.keys(fishImageFiles).forEach(fishId => {
+    fishImages[fishId] = new Image();
+    fishImages[fishId].src = `fish/${fishImageFiles[fishId]}`;
+  });
+
   const CHARACTERS = {
     char1: {
       id: "char1",
@@ -633,7 +662,11 @@ function startGame() {
     canSell = false,
     onSell,
   }) {
-    const imageUrl = createFishImageUrl(fish);
+    // Use actual fish image if available, otherwise fallback to procedural generation
+    const fishImage = fishImages[fish.id];
+    const imageUrl = (fishImage && fishImage.complete && fishImage.naturalHeight !== 0)
+      ? fishImage.src
+      : createFishImageUrl(fish);
     catchImage.src = imageUrl;
     catchImage.alt = `${fish.name} illustration`;
     catchName.textContent = title;
@@ -1057,11 +1090,15 @@ function startGame() {
 
       const thumb = document.createElement("img");
       thumb.className = "fish-thumb";
-      thumb.src = createFishImageUrl({
-        ...entry.fish,
-        length: bestLength,
-        value: bestValue,
-      });
+      // Use actual fish image if available, otherwise fallback to procedural generation
+      const fishImage = fishImages[entry.fish.id];
+      thumb.src = (fishImage && fishImage.complete && fishImage.naturalHeight !== 0)
+        ? fishImage.src
+        : createFishImageUrl({
+            ...entry.fish,
+            length: bestLength,
+            value: bestValue,
+          });
       thumb.alt = `${entry.fish.name} illustration`;
       li.appendChild(thumb);
 

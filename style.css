@@ -329,6 +329,7 @@ body {
   height: 38px;
   border-radius: 0.6rem;
   box-shadow: inset 0 0 0 2px rgba(148, 197, 255, 0.25);
+  background: white;
 }
 
 #collection-list li .fish-count {
@@ -415,6 +416,7 @@ body {
   height: auto;
   border-radius: 0.95rem;
   box-shadow: inset 0 0 0 2px rgba(148, 197, 255, 0.25);
+  background: white;
 }
 
 .catch-text {
