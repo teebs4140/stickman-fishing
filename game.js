@@ -115,10 +115,12 @@ function startGame() {
     char1: new Image(),
     char2: new Image(),
     char3: new Image(),
+    char4: new Image(),
   };
   characterImages.char1.src = "characters/image-removebg-preview.png";
   characterImages.char2.src = "characters/image_2-removebg-preview.png";
   characterImages.char3.src = "characters/image_5-removebg-preview.png";
+  characterImages.char4.src = "characters/logan-removebg-preview.png";
 
   // Fish images - loaded asynchronously
   const fishImageFiles = {
@@ -174,6 +176,14 @@ function startGame() {
       description: "Confident fisher with expert technique.",
       rodTipOffsetX: 0.80,  // Rod tip - more to the left for Fisher Green
       rodTipOffsetY: 0.22,  // Rod tip position - slightly down
+    },
+    char4: {
+      id: "char4",
+      name: "Logan Vial",
+      cost: 0,
+      description: "Cookie enthusiast angler.",
+      rodTipOffsetX: 0.96,  // Rod tip position - initial estimate
+      rodTipOffsetY: 0.17,  // Rod tip position
     },
   };
 
@@ -234,7 +244,7 @@ function startGame() {
     collection: new Map(),
     backgroundFish: [],
     characters: {
-      owned: new Set(["char1"]), // char1 is free/default
+      owned: new Set(["char1", "char4"]), // char1 and char4 are free/default
       selected: "char1",
     },
   };
